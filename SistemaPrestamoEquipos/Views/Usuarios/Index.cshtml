@@ -6,67 +6,136 @@
 }
 
 <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-
-
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 
 <style>
+    body {
+        background-color: #f4f6f9;
+    }
+
+    .container-custom {
+        max-width: 1200px;
+        margin: 2rem auto;
+        padding: 0 15px;
+    }
+
+    .card {
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        border: none;
+    }
 
     .custom-alert {
         position: fixed;
-        bottom: 20px; /* Espacio desde el fondo */
-        right: 20px; /* Espacio desde la derecha */
-        z-index: 1050; /* Asegura que esté por encima de otros elementos */
-        background-color: black; /* Fondo negro */
-        color: white; /* Texto blanco */
-        border: 1px solid white; /* Borde blanco opcional */
-        padding: 10px; /* Espaciado interno */
-        display: none; /* Oculta por defecto; se puede mostrar con JavaScript */
-        border-radius: 5px; /* Esquinas redondeadas opcionales */
+        bottom: 20px;
+        right: 20px;
+        z-index: 1050;
+        background-color: black;
+        color: white;
+        border: 1px solid white;
+        padding: 10px;
+        display: none;
+        border-radius: 5px;
     }
 
+    .status-badge {
+        display: inline-block;
+        padding: 0.25em 0.5em;
+        font-size: 0.75em;
+        font-weight: 600;
+        line-height: 1;
+        text-align: center;
+        white-space: nowrap;
+        vertical-align: baseline;
+        border-radius: 0.25rem;
+    }
+
+        .status-badge.habilitado {
+            background-color: #28a745;
+            color: white;
+        }
+
+        .status-badge.inhabilitado {
+            background-color: #dc3545;
+            color: white;
+        }
+
+    .user-icon {
+        margin-right: 10px;
+        font-size: 1.2em;
+    }
+
+        .user-icon.habilitado {
+            color: #28a745;
+        }
+
+        .user-icon.inhabilitado {
+            color: #dc3545;
+        }
 </style>
 
-<div class="container">
-    <h2>Estudiantes</h2>
-    <table class="table" id="estudiantesTable">
-        <thead>
-            <tr>
-                <th>Id Estudiante</th>
-                <th>Nombre</th>
-                <th>Correo</th>
-                <th>Estado</th>
-                <th>Acciones</th>
-            </tr>
-        </thead>
-        <tbody>
-            <!-- Aquí se agregarán filas dinámicamente -->
-            @if (Model != null && Model.Any())
-            {
-                foreach (var estudiante in Model)
-                {
+<div class="container-custom">
+    <div class="row mb-3 align-items-center">
+        <div class="col">
+            <h2 class="mb-0">
+                <i class="fas fa-users"></i> Gestión de Estudiantes
+            </h2>
+        </div>
+        <div class="col-auto">
+            <button class="btn btn-success" id="btnAddEstudiante">
+                <i class="fas fa-plus-circle"></i> Agregar Estudiante
+            </button>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-body p-4">
+            <table class="table table-hover" id="estudiantesTable">
+                <thead class="thead-light">
                     <tr>
-                        <td>@estudiante.IdEstudiante</td>
-                        <td>@estudiante.Usuario.Nombre</td>  <!-- Nombre del estudiante -->
-                        <td>@estudiante.Usuario.Correo</td>  <!-- Correo del estudiante -->
-                        <td>@estudiante.Estado</td>  <!-- Estado del estudiante -->
-                        <td>
-                            <!-- Acciones -->
-                            <button class="btn btn-primary btn-estudiante" data-id="@estudiante.IdEstudiante">
-                                Ver
-                            </button>
-                        </td>
+                        <th>ID</th>
+                        <th>Estudiante</th>
+                        <th>Correo</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
                     </tr>
-                }
-            }
-            else
-            {
-                <tr>
-                    <td colspan="4" class="text-warning">No hay estudiantes disponibles. Por favor, agrega un estudiante.</td>
-                </tr>
-            }
-        </tbody>
-    </table>
-    <button class="btn btn-success" id="btnAddEstudiante">Agregar Estudiante</button>
+                </thead>
+                <tbody>
+                    @if (Model != null && Model.Any())
+                    {
+                        foreach (var estudiante in Model)
+                        {
+                            <tr>
+                                <td>@estudiante.IdEstudiante</td>
+                                <td>
+                                    <i class="fas fa-user user-icon @(estudiante.Estado == "habilitado" ? "habilitado" : "inhabilitado")"></i>
+                                    @estudiante.Usuario.Nombre
+                                </td>
+                                <td>@estudiante.Usuario.Correo</td>
+                                <td>
+                                    <span class="status-badge @(estudiante.Estado == "habilitado" ? "habilitado" : "inhabilitado")">
+                                        @estudiante.Estado
+                                    </span>
+                                </td>
+                                <td>
+                                    <button class="btn btn-primary btn-sm btn-estudiante" data-id="@estudiante.IdEstudiante">
+                                        <i class="fas fa-eye"></i> Ver
+                                    </button>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="5" class="text-center text-warning">
+                                <i class="fas fa-info-circle"></i> No hay estudiantes disponibles. Por favor, agrega un estudiante.
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
 
     @if (!string.IsNullOrEmpty(message))
     {
@@ -74,7 +143,6 @@
             @message
         </div>
     }
-
 </div>
 
 @* Modal para agregar estudiante *@
@@ -82,17 +150,25 @@
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">Agregar Estudiante</h5>
+                <h5 class="modal-title">
+                    <i class="fas fa-user-plus"></i> Agregar Estudiante
+                </h5>
             </div>
             <div class="modal-body">
                 <form id="addInventarioForm" method="post" action="@Url.Action("AddEstudiante", "Usuarios")">
                     <div class="form-group">
-                        <label>Nombre:</label> <input type="text" class="form-control" id="nombre" name="nombre" required />
-                        <label>Correo:</label> <input type="text" class="form-control" id="correo" name="correo" required />
+                        <label><i class="fas fa-signature"></i> Nombre:</label>
+                        <input type="text" class="form-control" id="nombre" name="nombre" required />
+                        <label><i class="fas fa-envelope"></i> Correo:</label>
+                        <input type="text" class="form-control" id="correo" name="correo" required />
                     </div>
                     <div class="modal-footer">
-                        <button type="submit" class="btn btn-primary">Guardar</button>
-                        <button type="button" class="btn btn-secondary" id="btnCancelAddEstudiante">Cancelar</button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i> Guardar
+                        </button>
+                        <button type="button" class="btn btn-secondary" id="btnCancelAddEstudiante">
+                            <i class="fas fa-times"></i> Cancelar
+                        </button>
                     </div>
                 </form>
             </div>
@@ -101,9 +177,7 @@
 </div>
 
 @section Scripts {
-<script>
-        let editMode = false;
-
+    <script>
         $(".btn-estudiante").click(function () {
             var idEstudiante = $(this).data('id');
             window.location.href = '@Url.Action("Estudiante", "Usuarios", new { idEstudiante = "__idEstudiante__" })'.replace('__idEstudiante__', idEstudiante);
@@ -116,6 +190,5 @@
         $("#btnAddEstudiante").click(function () {
             $('#addEstudianteModal').modal('show');
         });
-
-</script>
+    </script>
 }

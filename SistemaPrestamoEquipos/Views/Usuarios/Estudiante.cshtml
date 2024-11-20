@@ -1,90 +1,192 @@
-﻿@model EstudianteModel // Asegúrate de que este sea el modelo correcto
+﻿@model EstudianteModel
 
 @{
     ViewData["Title"] = "Detalles del Estudiante";
-    var returnUrl = ViewData["ReturnUrl"] as string; // Obtenemos la URL de retorno desde ViewBag
+
+    var returnUrl = ViewData["ReturnUrl"] as string;
 }
+
+<link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+<style>
+    body {
+        background-color: #f4f6f9;
+    }
+
+    .container-custom {
+        max-width: 800px;
+        margin: 2rem auto;
+        padding: 0 15px;
+    }
+
+    .card {
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        border: none;
+    }
+
+    .profile-header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 1.5rem;
+    }
+
+    .profile-icon {
+        font-size: 3rem;
+        margin-right: 1rem;
+    }
+
+    .status-badge {
+        display: inline-block;
+        padding: 0.25em 0.5em;
+        font-size: 0.75em;
+        font-weight: 600;
+        line-height: 1;
+        text-align: center;
+        white-space: nowrap;
+        vertical-align: baseline;
+        border-radius: 0.25rem;
+    }
+
+        .status-badge.habilitado {
+            background-color: #28a745;
+            color: white;
+        }
+
+        .status-badge.inhabilitado {
+            background-color: #dc3545;
+            color: white;
+        }
+
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+        .form-group label {
+            margin-bottom: 0.5rem;
+            /*vertical-align: middle;  Alinea el ícono con el texto */
+        }
+
+        .form-group label i {
+            margin-right: 8px;
+            /*vertical-align: middle;  Alinea el ícono con el texto */
+        }
+</style>
 
 @if (Model == null)
+
 {
-    <p> No se encontró el equipo solicitado</p>
+    <div class="container-custom">
+        <div class="alert alert-warning">
+            <i class="fas fa-exclamation-triangle"></i> No se encontró el estudiante solicitado
+        </div>
+    </div>
 }
+
 else
+
 {
-    <h2>Detalles del Estudiante</h2>
+    <div class="container-custom">
+        <div class="card">
+            <div class="card-body p-4">
+                <div class="profile-header">
+                    <i class="fas fa-user profile-icon @(Model.Estado == "habilitado" ? "text-success" : "text-danger")"></i>
+                    <div>
+                        <h2 class="mb-1">@Model.Usuario.Nombre</h2>
+                        <span class="status-badge @(Model.Estado == "habilitado" ? "habilitado" : "inhabilitado")">
+                            @Model.Estado
+                        </span>
+                    </div>
+                </div>
 
-    <form id="formEstudiante" method="post" action="@Url.Action("SetEstudiante", "Usuarios")">
-        <div>
-            <input type="hidden" name="returnUrl" value="@returnUrl" />
+                <form id="formEstudiante" method="post" action="@Url.Action("SetEstudiante", "Usuarios")">
+                    <input type="hidden" name="returnUrl" value="@returnUrl" />
 
-            <p><strong>ID Estudiante:</strong> <input type="text" name="idEquipo" value="@Model.IdEstudiante" readonly /></p>
-            <p><strong>ID Usuario:</strong> @Model.Usuario.IdUsuario</p>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="font-weight-bold"><i class="fas fa-id-badge"></i>ID Estudiante</label>
+                                <input type="text" class="form-control" value="@Model.IdEstudiante" readonly />
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="font-weight-bold"><i class="fas fa-user-tag mr-2"></i>ID Usuario</label>
+                                <input type="text" class="form-control" value="@Model.Usuario.IdUsuario" readonly />
+                            </div>
+                        </div>
+                    </div>
 
-            <p><strong>Rol:</strong> @Model.Usuario.Rol</p>
-            <p><strong>Estado:</strong> @Model.Estado</p>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="font-weight-bold"><i class="fas fa-user-shield mr-2"></i>Rol</label>
+                                <input type="text" class="form-control" value="@Model.Usuario.Rol" readonly />
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="font-weight-bold"><i class="fas fa-envelope mr-2"></i>Correo</label>
+                                <input type="text" class="form-control" value="@Model.Usuario.Correo" readonly />
+                            </div>
+                        </div>
+                    </div>
 
-            <p><strong>Nombre:</strong> <input type="text" id="inputNombre" name="nombre" value="@Model.Usuario.Nombre" readonly /></p>
-            <p><strong>Correo:</strong> <input type="text" id="inputCorreo" name="correo" value="@Model.Usuario.Correo" readonly /></p>
+                    <div class="mt-4 d-flex justify-content-between">
+                        <div>
+                            <button type="button" class="btn btn-primary" id="btnToggleEstado"
+                                    data-id="@Model.IdEstudiante"
+                                    data-estado="@Model.Estado">
+                                <i class="fas fa-power-off mr-2"></i>
+                                @(Model.Estado == "habilitado" ? "Inhabilitar" : "Habilitar")
+                            </button>
+                            <button type="button" class="btn btn-warning ml-2" id="btnReestablecerContrasenia">
+                                <i class="fas fa-key mr-2"></i>Reestablecer Contraseña
+                            </button>
+                        </div>
+                        <button type="button" class="btn btn-danger" id="btnDeleteEstudiante">
+                            <i class="fas fa-trash-alt mr-2"></i>Eliminar Estudiante
+                        </button>
+                    </div>
+                </form>
+            </div>
         </div>
 
-        <div>
-            <!--
-                <button type="button" class="btn btn-primary" id="btnInhabilitarEstudiante">Inhabilitar</button>
-            -->
+        <div class="text-center mt-3">
+            @if (!string.IsNullOrEmpty(returnUrl))
 
-            <button type="button" class="btn btn-primary" id="btnToggleEstado" data-id="@Model.IdEstudiante" data-estado="@Model.Estado">
-                @(Model.Estado == "habilitado" ? "Inhabilitar" : "Habilitar")
-            </button>
+            {
+                <a href="@returnUrl" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left mr-2"></i>Regresar
+                </a>
+            }
 
+            else
 
-            <button type="button" class="btn btn-primary" id="btnReestablecerContrasenia">Reestablecer Contraseña</button>
-            <button type="button" class="btn btn-primary" id="btnDeleteEstudiante">Eliminar Estudiante</button>
+            {
+                <a href="@Url.Action("Index", "Inventario")" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left mr-2"></i>Volver a Inventario
+                </a>
+            }
         </div>
-    </form>
+    </div>
 }
-
-<div>
-    @if (!string.IsNullOrEmpty(returnUrl))
-    {
-        <a href="@returnUrl" class="btn btn-secondary">Regresar</a>
-    }
-    else
-    {
-        <a href="@Url.Action("Index", "Inventario")" class="btn btn-secondary">Volver a Inventario</a>
-    }
-</div>
 
 @section Scripts {
-    <script>
-        $(document).ready(function () {
-            var isEditing = false;
-
-            $('#btnDeleteEstudiante').click(function () {
-                /*
-                if (isEditing) {
-
-                    //$('#formEstudiante').submit();
-                } else {
-                    $(this).text('Guardar');
-                }
-                isEditing = !isEditing;
-                */
-            });
-        });
-    </script>
-
     <script>
         $(document).ready(function () {
             $('#btnToggleEstado').click(function () {
                 const idEstudiante = $(this).data('id');
                 const estadoActual = $(this).data('estado');
                 const url = '@Url.Action("ToggleEstadoEstudiante", "Usuarios")';
-
                 $.post(url, { idEstudiante: idEstudiante }, function (response) {
                     if (response.success) {
                         const nuevoEstado = response.nuevoEstado;
                         $('#btnToggleEstado').text(nuevoEstado === "habilitado" ? "Inhabilitar" : "Habilitar");
                         $('#btnToggleEstado').data('estado', nuevoEstado);
+                        // Optional: Update visual state
+                        $('.profile-icon').toggleClass('text-success text-danger');
+                        $('.status-badge').toggleClass('habilitado inhabilitado').text(nuevoEstado);
                         alert("El estado del estudiante ha cambiado a: " + nuevoEstado);
                     } else {
                         alert("Hubo un error al cambiar el estado del estudiante.");
