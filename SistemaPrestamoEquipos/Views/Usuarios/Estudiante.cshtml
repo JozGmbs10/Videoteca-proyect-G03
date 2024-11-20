@@ -71,6 +71,21 @@
             margin-right: 8px;
             /*vertical-align: middle;  Alinea el ícono con el texto */
         }
+
+    #confirmationModal .modal-content {
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        border-radius: 10px;
+    }
+
+    #confirmationModal .modal-header {
+        background-color: #007bff;
+        color: white;
+        border-bottom: none;
+    }
+
+    #confirmationModal .modal-footer {
+        border-top: none;
+    }
 </style>
 
 @if (Model == null)
@@ -172,6 +187,24 @@ else
     </div>
 }
 
+<!-- Modal de confirmación -->
+<div class="modal fade" id="confirmationModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Confirmación</h5>
+            </div>
+            <div class="modal-body">
+                <p id="confirmationMessage">El estado del estudiante ha cambiado.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-dismiss="modal">Aceptar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
 @section Scripts {
     <script>
         $(document).ready(function () {
@@ -187,9 +220,23 @@ else
                         // Optional: Update visual state
                         $('.profile-icon').toggleClass('text-success text-danger');
                         $('.status-badge').toggleClass('habilitado inhabilitado').text(nuevoEstado);
-                        alert("El estado del estudiante ha cambiado a: " + nuevoEstado);
+                        //alert("El estado del estudiante ha cambiado a: " + nuevoEstado);
+                        // Mostrar el modal con el mensaje
+                        $('#confirmationMessage').text(`El estado del estudiante ha cambiado a: ${nuevoEstado}.`);
+                        $('#confirmationModal').modal('show');
+                        $('#confirmationModal').on('click', '.btn-primary', function () {
+                            $('#confirmationModal').modal('hide');
+                        });
+
                     } else {
-                        alert("Hubo un error al cambiar el estado del estudiante.");
+                        //alert("Hubo un error al cambiar el estado del estudiante.");
+                        // Mostrar un error si la operación falla
+                        $('#confirmationMessage').text("Hubo un error al cambiar el estado del estudiante.");
+                        $('#confirmationModal').modal('show');
+                        $('#confirmationModal').on('click', '.btn-primary', function () {
+                            $('#confirmationModal').modal('hide');
+                        });
+
                     }
                 });
             });
