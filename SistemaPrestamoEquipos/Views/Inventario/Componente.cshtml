@@ -1,0 +1,42 @@
+﻿@model ComponenteModel // Asegúrate de que este sea el modelo correcto
+
+@{
+    ViewData["Title"] = "Detalles del Componente";
+    var returnUrl = ViewData["ReturnUrl"] as string;  // Obtenemos la URL de retorno desde ViewBag
+}
+
+@if (Model == null)
+{
+    <p> No se encontró el componente solicitado</p>
+}
+else
+{
+    <h2>Detalles del Equipo</h2>
+
+    <div>
+        <p><strong>ID Componente:</strong> @Model.IdComp</p>
+        <p><strong>ID Inventario:</strong> @Model.IdInventario</p>
+        <p><strong>ID Equipo:</strong> @Model.IdEquipo</p>
+        <p><strong>Tipo:</strong> @Model.Tipo</p>
+
+        <p><strong>Estado:</strong> @Model.Estado</p>
+        <p><strong>Código:</strong> @Model.Codigo</p>
+        <p><strong>Marca:</strong> @Model.Marca</p>
+        <p><strong>Disponibilidad:</strong> @Model.Disponibilidad</p>
+    </div>
+
+    <button type="button" class="btn btn-primary" id="btnSetComponente">Modificar</button>
+}
+
+<div>
+    @if (!string.IsNullOrEmpty(returnUrl))
+    {
+        <!-- Si returnUrl tiene valor, mostramos un botón para regresar a la URL original -->
+        <a href="@returnUrl" class="btn btn-secondary">Regresar</a>
+    }
+    else
+    {
+        <!-- Si no hay returnUrl, mostramos un botón que redirige al inventario o a una página predeterminada -->
+        <a href="@Url.Action("Index", "Inventario")" class="btn btn-secondary">Volver a Inventario</a>
+    }
+</div>

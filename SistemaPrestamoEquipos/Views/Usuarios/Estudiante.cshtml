@@ -1,0 +1,67 @@
+﻿@model EstudianteModel // Asegúrate de que este sea el modelo correcto
+
+@{
+    ViewData["Title"] = "Detalles del Estudiante";
+    var returnUrl = ViewData["ReturnUrl"] as string; // Obtenemos la URL de retorno desde ViewBag
+}
+
+@if (Model == null)
+{
+    <p> No se encontró el equipo solicitado</p>
+}
+else
+{
+    <h2>Detalles del Estudiante</h2>
+
+    <form id="formEstudiante" method="post" action="@Url.Action("SetEstudiante", "Usuarios")">
+        <div>
+            <input type="hidden" name="returnUrl" value="@returnUrl" />
+
+            <p><strong>ID Estudiante:</strong> <input type="text" name="idEquipo" value="@Model.IdEstudiante" readonly /></p>
+            <p><strong>ID Usuario:</strong> @Model.Usuario.IdUsuario</p>
+
+            <p><strong>Rol:</strong> @Model.Usuario.Rol</p>
+            <p><strong>Estado:</strong> @Model.Estado</p>
+
+            <p><strong>Nombre:</strong> <input type="text" id="inputNombre" name="nombre" value="@Model.Usuario.Nombre" readonly /></p>
+            <p><strong>Correo:</strong> <input type="text" id="inputCorreo" name="correo" value="@Model.Usuario.Correo" readonly /></p>
+        </div>
+
+        <div>
+            <button type="button" class="btn btn-primary" id="btnInhabilitarEstudiante">Inhabilitar</button>
+            <button type="button" class="btn btn-primary" id="btnReestablecerContrasenia">Reestablecer Contraseña</button>
+            <button type="button" class="btn btn-primary" id="btnDeleteEstudiante">Eliminar Estudiante</button>
+        </div>
+    </form>
+}
+
+<div>
+    @if (!string.IsNullOrEmpty(returnUrl))
+    {
+        <a href="@returnUrl" class="btn btn-secondary">Regresar</a>
+    }
+    else
+    {
+        <a href="@Url.Action("Index", "Inventario")" class="btn btn-secondary">Volver a Inventario</a>
+    }
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            var isEditing = false;
+
+            $('#btnDeleteEstudiante').click(function () {
+                /*
+                if (isEditing) {
+
+                    //$('#formEstudiante').submit();
+                } else {
+                    $(this).text('Guardar');
+                }
+                isEditing = !isEditing;
+                */
+             });
+        });
+    </script>
+}

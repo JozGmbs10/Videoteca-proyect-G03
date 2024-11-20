@@ -1,0 +1,11 @@
+﻿@{
+    var userType = Context.Session.GetString("TypeRol");
+    if (userType == "admin")
+    {
+        Layout = "_LayoutAdmin";
+    }
+    else if (userType == "estudiante")
+    {
+        Layout = "_LayoutEstudiante";
+    }
+}

@@ -1,0 +1,90 @@
+﻿@model EquipoModel // Asegúrate de que este sea el modelo correcto
+
+@{
+    ViewData["Title"] = "Detalles del Equipo";
+    var returnUrl = ViewData["ReturnUrl"] as string; // Obtenemos la URL de retorno desde ViewBag
+}
+
+@if (Model == null)
+{
+    <p> No se encontró el equipo solicitado</p>
+}
+else
+{
+    <h2>Detalles del Equipo</h2>
+
+    <form id="formEquipo" method="post" action="@Url.Action("SetEquipo", "Inventario")">
+        <div>
+            <input type="hidden" name="returnUrl" value="@returnUrl" />
+
+            <p><strong>ID Equipo:</strong> <input type="text" name="idEquipo" value="@Model.IdEquipo" readonly /></p>
+
+            <p><strong>Nombre:</strong> @Model.Nombre</p>
+            <p><strong>Estado:</strong> @Model.Estado</p>
+            <p><strong>ID Inventario:</strong> @Model.IdInventario</p>
+            <p><strong>Disponibilidad:</strong> @Model.Disponibilidad</p>
+            <p><strong>Número de Laboratorio:</strong> @Model.NumLabo</p>
+            
+            <p><strong>Código en Labo:</strong> <input type="text" id="inputCodigoEnLabo" name="codigoEnLabo" value="@Model.CodigoEnLabo" readonly /></p>
+            <p><strong>Código Pantalla:</strong> <input type="text" id="inputCodigoPantalla" name="codigoPantalla" value="@Model.CodigoPantalla" readonly /></p>
+            <p><strong>Código CPU:</strong> <input type="text" id="inputCodigoCpu" name="codigoCpu" value="@Model.CodigoCpu" readonly /></p>
+            <p><strong>Código Teclado:</strong> <input type="text" id="inputCodigoTeclado" name="codigoTeclado" value="@Model.CodigoTeclado" readonly /></p>
+            <p><strong>Código Mouse:</strong> <input type="text" id="inputCodigoMouse" name="codigoMouse" value="@Model.CodigoMouse" readonly /></p>
+        </div>
+
+        <button type="button" class="btn btn-primary" id="btnSetEquipo">Modificar</button>
+    </form>
+}
+
+<div>
+    @if (!string.IsNullOrEmpty(returnUrl))
+    {
+        <a href="@returnUrl" class="btn btn-secondary">Regresar</a>
+    }
+    else
+    {
+        <a href="@Url.Action("Index", "Inventario")" class="btn btn-secondary">Volver a Inventario</a>
+    }
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            var isEditing = false;
+
+            $('#btnSetEquipo').click(function () {
+                if (isEditing) {
+                    if ($('#inputCodigoEnLabo').val() == '@Model.CodigoEnLabo') {
+                        $('#inputCodigoEnLabo').val('-1');
+                    }
+
+                    if ($('#inputCodigoCpu').val() == '@Model.CodigoCpu') {
+                        $('#inputCodigoCpu').val(null);
+                    }
+
+                    if ($('#inputCodigoMouse').val() == '@Model.CodigoMouse') {
+                        $('#inputCodigoMouse').val(null);
+                    }
+
+                    if ($('#inputCodigoPantalla').val() == '@Model.CodigoPantalla') {
+                        $('#inputCodigoPantalla').val(null);
+                    }
+
+                    if ($('#inputCodigoTeclado').val() == '@Model.CodigoTeclado') {
+                        $('#inputCodigoTeclado').val(null);
+                    }
+
+                    $('#formEquipo').submit();
+                } else {
+                    $('#inputCodigoEnLabo').prop('readonly', false);
+                    $('#inputCodigoPantalla').prop('readonly', false);
+                    $('#inputCodigoTeclado').prop('readonly', false);
+                    $('#inputCodigoMouse').prop('readonly', false);
+                    $('#inputCodigoCpu').prop('readonly', false);
+                    $(this).text('Guardar');
+                }
+                isEditing = !isEditing;
+            });
+        });
+    </script>
+}

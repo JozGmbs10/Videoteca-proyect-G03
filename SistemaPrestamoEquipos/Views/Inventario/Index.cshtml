@@ -1,0 +1,127 @@
+﻿@model List<InventarioModel>
+
+@{
+    ViewData["Title"] = "Inventarios";
+    var message = TempData["Message"] as string;
+}
+
+<link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+
+<style>
+    .custom-alert {
+        position: fixed;
+        bottom: 20px; /* Espacio desde el fondo */
+        right: 20px; /* Espacio desde la derecha */
+        z-index: 1050; /* Asegura que esté por encima de otros elementos */
+        background-color: black; /* Fondo negro */
+        color: white; /* Texto blanco */
+        border: 1px solid white; /* Borde blanco opcional */
+        padding: 10px; /* Espaciado interno */
+        display: none; /* Oculta por defecto; se puede mostrar con JavaScript */
+        border-radius: 5px; /* Esquinas redondeadas opcionales */
+    }
+</style>
+
+<div class="container">
+    <h1>@ViewData["Title"]</h1>
+
+    <!-- Mostrar mensaje de éxito si existe -->
+    @if (!string.IsNullOrEmpty(message))
+    {
+        <div class="alert custom-alert" role="alert" id="error-message">
+            @message
+        </div>
+    }
+
+    <div class="row">
+        <div class="col-md-12">
+            <!-- Tabla de Inventarios -->
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>ID Inventario</th>
+                        <th>Número de Laboratorio</th>
+                        <th>Número de Equipos</th>
+                        <th>Número de Componentes</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model != null && Model.Any())
+                    {
+                        foreach (var inventario in Model)
+                        {
+                            <tr>
+                                <td>@inventario.IdInventario</td>
+                                <td>@inventario.NumLabo</td>
+                                <td>@inventario.NumEquipos</td>
+                                <td>@inventario.NumComponentes</td>
+                                <td>
+                                    <a href="@Url.Action("Laboratorio", "Inventario", new { idInventario = inventario.IdInventario })" class="btn btn-info">Ver</a>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="5" class="text-center">No hay inventarios disponibles. Por favor, agrega un inventario.</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+
+            <!-- Botón para agregar inventario -->
+            <button class="btn btn-success" id="btnAddInventario">Agregar Inventario</button>
+        </div>
+    </div>
+</div>
+
+
+
+
+@* Modal para agregar inventario *@
+<div class="modal" id="addInventarioModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Agregar Inventario</h5>
+            </div>
+            <div class="modal-body">
+                <form id="addInventarioForm" method="post" action="@Url.Action("AddInventario", "Inventario")">
+                    <div class="form-group">
+                        <label>Número de Laboratorio:</label>
+                        <input type="text" class="form-control" id="numLabo" name="numLabo" required />
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-primary">Guardar</button>
+                        <button type="button" class="btn btn-secondary" id="cancelAddInventarioBtn">Cancelar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@section Scripts {
+    <script>
+            $("#btnAddInventario").click(function () {
+                    $('#addInventarioModal').modal('show');
+            });
+
+            $("#btnCancelAddInventario").click(function () {
+                        $('#addInventarioModal').modal('hide');
+            });
+
+            $(document).ready(function () {
+                    var errorMessage = $("#error-message");
+                    if (errorMessage.length) {
+                        errorMessage.show(); // Mostrar el mensaje
+                        setTimeout(function () {
+                            errorMessage.fadeOut(); // Desaparecer después de 3 segundos
+                        }, 3000);
+                    }
+            });
+    </script>
+}

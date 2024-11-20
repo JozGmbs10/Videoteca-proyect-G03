@@ -1,0 +1,93 @@
+﻿@model UsuarioModel
+
+@{
+    ViewData["Title"] = "Perfil";
+    var errorMessage = TempData["ErrorMessage"] as string; // Obtener el mensaje de error
+    var successMessage = TempData["SuccessMessage"] as string; // Obtener el mensaje de éxito
+}
+
+<main role="main" class="pb-3">
+    <h1>Perfil de Usuario</h1>
+    <p>Id: @Model.IdUsuario</p>
+    <p>Nombre: @Model.Nombre</p>
+    <p>Correo: @Model.Correo</p>
+    <p>Tipo de usuario: @Model.Rol</p>
+
+    <!-- Mostrar mensaje de error -->
+    @if (!string.IsNullOrEmpty(errorMessage))
+    {
+        <div class="alert alert-danger position-fixed bottom-0 end-0 m-3" role="alert" id="error-message">
+            @errorMessage
+        </div>
+    }
+
+    <!-- Mostrar mensaje de éxito -->
+    @if (!string.IsNullOrEmpty(successMessage))
+    {
+        <div class="alert alert-success position-fixed bottom-0 end-0 m-3" role="alert" id="success-message">
+            @successMessage
+        </div>
+    }
+
+    <!-- Botón para abrir el formulario de cambio de contraseña -->
+    <button class="btn btn-primary" id="changePasswordBtn">Cambiar Contraseña</button>
+
+    <!-- Modal para cambiar la contraseña -->
+    <div class="modal" id="changePasswordModal" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Cambiar Contraseña</h5>
+                </div>
+                <div class="modal-body">
+                    <form asp-action="ChangePassword" method="post">
+                        <div class="form-group">
+                            <label for="nuevaContrasenia">Nueva Contraseña:</label>
+                            <input type="password" class="form-control" id="nuevaContrasenia" name="nuevaContrasenia" required />
+                        </div>
+                        <div class="form-group">
+                            <label for="repiteContrasenia">Confirmar Nueva Contraseña:</label>
+                            <input type="password" class="form-control" id="repiteContrasenia" name="repiteContrasenia" required />
+                        </div>
+                        <div class="modal-footer">
+                            <button type="submit" class="btn btn-primary">Aceptar</button>
+                            <button type="button" class="btn btn-secondary" id="cancelBtn">Cancelar</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            // Mostrar mensajes de error si existen
+            var errorMessage = $("#error-message");
+                if (errorMessage.length) {
+                errorMessage.show(); // Mostrar el mensaje de error
+                setTimeout(function () {
+                    errorMessage.fadeOut(); // Desaparecer después de 2 segundos
+                    }, 2000); // 2000 ms
+                }
+
+                // Mostrar mensajes de éxito si existen
+                var successMessage = $("#success-message");
+                if (successMessage.length) {
+                    successMessage.show(); // Mostrar el mensaje de éxito
+                    setTimeout(function () {
+                        successMessage.fadeOut(); // Desaparecer después de 2 segundos
+                    }, 2000); // 2000 ms
+                }
+
+                document.getElementById('changePasswordBtn').onclick = function () {
+                    $('#changePasswordModal').modal('show'); // Mostrar el modal
+                };
+
+                document.getElementById('cancelBtn').onclick = function () {
+                    $('#changePasswordModal').modal('hide'); // Ocultar el modal
+                };
+            });
+    </script>
+}

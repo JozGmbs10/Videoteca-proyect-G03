@@ -1,0 +1,314 @@
+﻿@model InventarioModel
+
+@{
+    ViewData["Title"] = "Detalles del Inventario";
+    var idInventario = Model.IdInventario;
+    var message = TempData["Message"] as string;
+}
+
+<link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+
+<style>
+    .custom-alert {
+        position: fixed;
+        bottom: 20px; /* Espacio desde el fondo */
+        right: 20px; /* Espacio desde la derecha */
+        z-index: 1050; /* Asegura que esté por encima de otros elementos */
+        background-color: black; /* Fondo negro */
+        color: white; /* Texto blanco */
+        border: 1px solid white; /* Borde blanco opcional */
+        padding: 10px; /* Espaciado interno */
+        display: none; /* Oculta por defecto; se puede mostrar con JavaScript */
+        border-radius: 5px; /* Esquinas redondeadas opcionales */
+    }
+</style>
+
+@if (Model == null)
+{
+    <p> No se encontró el inventario solicitado</p>
+}
+else
+{
+    <h2>Detalles del Inventario</h2>
+
+    <div>
+        <p><strong>ID Inventario:</strong> @Model.IdInventario</p>
+        <p><strong>ID Admin:</strong> @Model.IdAdmin</p>
+        <p><strong>Número de laboratorio:</strong> @Model.NumLabo</p>
+        <p><strong>Número de equipos:</strong> @Model.NumEquipos</p>
+        <p><strong>Número de componentes:</strong> @Model.NumComponentes</p>
+    </div>
+
+
+
+    <!-- Sección de pestañas -->
+    <div class="row mt-3">
+        <div class="col-md-12">
+            <ul class="nav nav-tabs" id="inventoryTabs">
+                <li class="nav-item">
+                    <a class="nav-link active" data-toggle="tab" href="#equiposSection">Equipos</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" data-toggle="tab" href="#compsSection">Componentes</a>
+                </li>
+            </ul>
+
+            <div class="tab-content">
+                <div class="tab-pane fade show active" id="equiposSection">
+                    <table class="table" id="equiposTable">
+                        <thead>
+                            <tr>
+                                <th>Id</th>
+                                <th>Nombre</th>
+                                <th>Estado</th>
+                                <th>Disponibilidad</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Aquí se agregarán filas dinámicamente -->
+                        </tbody>
+                    </table>
+                    <button class="btn btn-success" id="btnAddEquipo">Agregar Equipo</button>
+                </div>
+
+                <div class="tab-pane fade" id="compsSection">
+                    <table class="table" id="compsTable">
+                        <thead>
+                            <tr>
+                                <th>Id</th>
+                                <th>Tipo</th>
+                                <th>Estado</th>
+                                <th>Código</th>
+                                <th>Disponibilidad</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Aquí se agregarán filas dinámicamente -->
+                        </tbody>
+                    </table>
+                    <button class="btn btn-success" id="btnAddComponente">Agregar Componente</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+        @* Modal para agregar equipo *@
+    <div class="modal" id="addEquipoModal" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Agregar Equipo</h5>
+                </div>
+                <div class="modal-body">
+                    <form id="addEquipoForm" method="post" action="@Url.Action("AddEquipo", "Inventario")" onsubmit="return validateEquipo()">
+                        <input type="hidden" id="idInventarioAddEquipo" name="idInventario" value="@Model.IdInventario"/>
+                        <div class="form-group">
+                            <label>Código en Labo:</label>
+                            <input type="text" class="form-control" id="codigoEnLaboAdd" name="codigoEnLabo" required />
+                        </div>
+                        <div class="form-group">
+                            <label>Código Pantalla:</label>
+                            <input type="text" class="form-control" id="codigoPantallaAdd" name="codigoPantalla" maxlength="5" />
+                        </div>
+                        <div class="form-group">
+                            <label>Código CPU:</label>
+                            <input type="text" class="form-control" id="codigoCpuAdd" name="codigoCpu" maxlength="5" />
+                        </div>
+                        <div class="form-group">
+                            <label>Código Teclado:</label>
+                            <input type="text" class="form-control" id="codigoTecladoAdd" name="codigoTeclado" maxlength="5" />
+                        </div>
+                        <div class="form-group">
+                            <label>Código Mouse:</label>
+                            <input type="text" class="form-control" id="codigoMouseAdd" name="codigoMouse" maxlength="5" />
+                        </div>
+                        <div class="modal-footer">
+                            <button type="submit" class="btn btn-primary">Agregar</button>
+                            <button type="button" class="btn btn-secondary" id="btnCancelAddEquipo">Cancelar</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+}
+
+@if (!string.IsNullOrEmpty(message))
+{
+            <div class="alert custom-alert" role="alert" id="error-message">
+        @message
+            </div>
+}
+
+<div>
+    <a href="@Url.Action("Index", "Inventario")" class="btn btn-secondary">Regresar</a>
+</div>
+
+
+
+
+
+
+@* Modal para agregar componente *@
+<div class="modal" id="addComponenteModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Agregar Componente</h5>
+            </div>
+            <div class="modal-body">
+                <form id="addCompForm" method="post" action="@Url.Action("AddComponente", "Inventario")" onsubmit="return validateComponente()">
+                    <input type="hidden" id="idInventarioAddComp" name="idInventario" value="@Model.IdInventario" />
+                    <div class="form-group">
+                        <label>Código de equipo:</label>
+                        <input type="text" class="form-control" id="idEquipoAddComp" name="idEquipo" maxlength="5" />
+                    </div>
+                    <div class="form-group">
+                        <label>Tipo:</label>
+                        <select class="form-control" id="tipoAddComp" name="tipo" required>
+                            <option value="pantalla">Pantalla</option>
+                            <option value="mouse">Mouse</option>
+                            <option value="teclado">Teclado</option>
+                            <option value="cpu">CPU</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Código:</label>
+                        <input type="text" class="form-control" id="codigoAddComp" name="codigo" required />
+                    </div>
+                    <div class="form-group">
+                        <label>Marca:</label>
+                        <input type="text" class="form-control" id="marcaAddComp" name="marca" />
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-primary">Agregar</button>
+                        <button type="button" class="btn btn-secondary" id="btnCancelAddComponente">Cancelar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+
+           $(document).ready(function () {
+                    var errorMessage = $("#error-message");
+                    if (errorMessage.length) {
+                        errorMessage.show(); // Mostrar el mensaje
+                        setTimeout(function () {
+                            errorMessage.fadeOut(); // Desaparecer después de 3 segundos
+                        }, 3000);
+                    }
+            });
+
+        function validateComponente() {
+            //document.getElementById('idInventarioAddComp').value = idInventario;
+            var idEquipoInput = document.getElementById('idEquipoAddComp');
+            if (idEquipoInput.value.trim() === "") {
+                idEquipoInput.value = "-1";
+            }
+            return true;
+        }
+
+        function validateEquipo() {
+            //document.getElementById('idInventarioAddEquipo').value = idInventario;
+            return true;
+        }
+
+        $("#btnAddEquipo").click(function () {
+                $('#addEquipoModal').modal('show');
+            });
+
+        $("#btnAddComponente").click(function () {
+                $('#addComponenteModal').modal('show');
+            });
+
+        $("#btnCancelAddEquipo").click(function () {
+                $('#addEquipoModal').modal('hide');
+            });
+
+        $("#btnCancelAddComponente").click(function () {
+                $('#addComponenteModal').modal('hide');
+            });
+                
+        var idInventario = @idInventario;
+        if (idInventario) {
+            cargarEquipos(idInventario);
+            cargarComponentes(idInventario);
+        }
+
+        function cargarEquipos(idInventario) {
+            $.post('@Url.Action("VerEquiposPorInventario", "Inventario")', { idInventario: idInventario }, function (equipos) {
+                $("#equiposTable tbody").empty(); // Limpiar tabla antes de agregar nuevos datos
+
+                var currentUrl = window.location.href;
+
+                // Verificar que la respuesta tenga datos
+                if (equipos && equipos.length > 0) {
+                    // Llenar la tabla con los datos de los equipos
+                    for (var i = 0; i < equipos.length; i++) {
+                        var enlaceVerEquipo = '@Url.Action("Equipo", "Inventario", new { idEquipo = "__ID__"})'
+                            .replace('__ID__', equipos[i].idEquipo);
+
+                        $("#equiposTable tbody").append(
+                            '<tr>' +
+                            '<td>' + equipos[i].idEquipo + '</td>' +
+                            '<td>' + equipos[i].nombre + '</td>' +
+                            '<td>' + equipos[i].estado + '</td>' +
+                            '<td>' + equipos[i].disponibilidad + '</td>' +
+                            '<td><a href="' + enlaceVerEquipo + '" class="btn btn-info">Ver</a></td>' +
+                            '</tr>'
+                        );
+                    }
+
+                    $("#equiposSection").show();
+                } else {
+                    $("#equiposTable tbody").append('<tr><td colspan="5">No hay equipos disponibles.</td></tr>');
+                    $("#equiposSection").show();
+                }
+            }).fail(function (jqXHR, textStatus, errorThrown) {
+                console.error("Error al cargar equipos:", textStatus, errorThrown);
+            });
+        }
+
+        function cargarComponentes(idInventario) {
+            $.post('@Url.Action("ComponentesPorInventario", "Inventario")', { idInventario: idInventario }, function (componentes) {
+                $("#compsTable tbody").empty(); // Limpiar tabla antes de agregar nuevos datos
+
+                var currentUrl = window.location.href;
+                if (componentes && componentes.length > 0) {
+                    for (var i = 0; i < componentes.length; i++) {
+                        var enlaceVerComponente = '@Url.Action("Componente", "Inventario", new { idComponente = "__ID__"})'
+                            .replace('__ID__', componentes[i].idComp);
+
+                        $("#compsTable tbody").append(
+                            '<tr>' +
+                            '<td>' + componentes[i].idComp + '</td>' +
+                            '<td>' + componentes[i].tipo + '</td>' +
+                            '<td>' + componentes[i].estado + '</td>' +
+                            '<td>' + componentes[i].codigo + '</td>' +
+                            '<td>' + componentes[i].disponibilidad + '</td>' +
+                            '<td><a href="' + enlaceVerComponente + '" class="btn btn-info">Ver</a></td>' +
+                            '</tr>'
+                        );
+                    }
+                    $("#compsSection").show();
+                } else {
+                    $("#compsTable tbody").append('<tr><td colspan="5">No hay componentes disponibles.</td></tr>');
+                    $("#compsSection").show();
+                }
+            }).fail(function (jqXHR, textStatus, errorThrown) {
+                console.error("Error al cargar equipos:", textStatus, errorThrown);
+            });
+        }
+
+    </script>
+}

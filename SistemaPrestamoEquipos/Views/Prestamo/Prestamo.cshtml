@@ -1,0 +1,78 @@
+﻿@model PrestamoModel // Asegúrate de que este sea el modelo correcto
+
+@{
+    ViewData["Title"] = "Detalles del Prestamo";
+    var returnUrl = ViewData["ReturnUrl"] as string; // Obtenemos la URL de retorno desde ViewBag
+    var userRol = ViewData["UserRol"] as string;
+}
+
+@if (Model == null)
+{
+    <p> No se encontró el prestamo solicitado</p>
+    @if (!string.IsNullOrEmpty(returnUrl))
+    {
+        <a href="@returnUrl" class="btn btn-secondary">Regresar</a>
+    }
+    else
+    {
+        <a href="@Url.Action("Index", "Inventario")" class="btn btn-secondary">Volver a Inventario</a>
+    }
+}
+else
+{
+    <h2>Detalles del Préstamo</h2>
+
+    <p><strong>ID Préstamo:</strong> @Model.IdPrestamo</p>
+    <p><strong>ID Equipo:</strong> @Model.IdEquipo</p>
+    <p><strong>ID Estudiante:</strong> @Model.IdEstudiante</p>
+    <p><strong>Estado:</strong> @Model.Estado</p>
+    <p><strong>Fecha:</strong> @Model.Fecha</p>
+    <p><strong>Hora Inicio Pedido:</strong> @Model.HoraInicioPedido</p>
+    <p><strong>Tiempo Pedido:</strong> @Model.TiempoPedido</p>
+    <p><strong>Hora Fin Pedido:</strong> @Model.HoraFinPedido</p>
+
+    <form id="finalizarPrestamoForm" action="@Url.Action("SetPrestamoFinalizar", "Prestamo")" method="post" style="display: none;">
+        <input type="hidden" name="idPrestamo" id="idPrestamo" />
+    </form>
+
+    @if(userRol == "estudiante")
+    {
+        <div>
+            @if (Model.Estado == "pendiente")
+            {
+                <button type="button" class="btn btn-primary" id="btnFinalizarPrestamo">Finalizar Préstamo</button>
+            }
+            @if (!string.IsNullOrEmpty(returnUrl))
+            {
+                <a href="@returnUrl" class="btn btn-secondary">Regresar</a>
+            }
+            else
+            {
+                <a href="@Url.Action("Index", "Prestamo")" class="btn btn-secondary">Volver a Inventario</a>
+            }
+        </div>
+    }
+    else
+    {
+        @if (!string.IsNullOrEmpty(returnUrl))
+        {
+            <a href="@returnUrl" class="btn btn-secondary">Regresar</a>
+        }
+        else
+        {
+            <a href="@Url.Action("Index", "Prestamo")" class="btn btn-secondary">Volver a Inventario</a>
+        }
+    }
+}
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            $('#btnFinalizarPrestamo').click(function () {
+                var idPrestamo = @Model.IdPrestamo;
+                $('#idPrestamo').val(idPrestamo);
+                $('#finalizarPrestamoForm').submit();
+            });
+        });
+    </script>
+}

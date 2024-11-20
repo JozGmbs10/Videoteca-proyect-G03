@@ -1,0 +1,39 @@
+﻿@* _ConfirmModal.cshtml *@
+@model (string mensaje, string callbackFunction)
+
+<div class="modal fade" id="confirmModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Confirmar Acción</h5>
+            </div>
+            <div class="modal-body">
+                <p>@Model.mensaje</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger" id="btnConfirmar">Aceptar</button>
+                <button type="button" class="btn btn-secondary" id="btnCancelar">Cancelar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).on('click', '#btnConfirmar', function () {
+            // Llamar a la función de callback con "aceptado"
+            if (typeof window[@Model.callbackFunction] === 'function') {
+                window[@Model.callbackFunction]("aceptado");
+            }
+            $('#confirmModal').modal('hide'); // Cerrar el modal
+        });
+
+        $(document).on('click', '#btnCancelar', function () {
+            // Llamar a la función de callback con "cancelado"
+            if (typeof window[@Model.callbackFunction] === 'function') {
+                window[@Model.callbackFunction]("cancelado");
+            }
+            $('#confirmModal').modal('hide'); // Cerrar el modal
+        });
+    </script>
+}

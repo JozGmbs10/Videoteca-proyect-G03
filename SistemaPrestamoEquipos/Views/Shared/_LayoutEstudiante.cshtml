@@ -1,0 +1,101 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - SistemaPrestamoEquipos</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <style>
+        body {
+            display: flex;
+            height: 100vh;
+            margin: 0;
+        }
+        .sidebar {
+            width: 250px; /* Ancho del sidebar */
+            background-color: #f8f9fa; /* Color de fondo del sidebar */
+            padding: 20px 0; /* Espaciado vertical */
+            position: fixed; /* Fijar el sidebar */
+            height: 100%; /* Altura completa */
+        }
+
+        .header {
+            width: calc(100% - 250px); /* Ancho completo menos el sidebar */
+            position: fixed; /* Fijar la franja superior */
+            top: 0;
+            left: 250px; /* Alineación con el sidebar */
+            background-color: #343a40; /* Color de fondo de la cabecera */
+            color: white; /* Color del texto */
+            padding: 10px; /* Espaciado */
+            z-index: 1000; /* Asegurar que esté sobre el contenido */
+            display: flex; /* Usar flexbox para alinear botones */
+            justify-content: space-between; /* Separar elementos a los extremos */
+            align-items: center; /* Centrar verticalmente */
+            height: 50px; /* Define la altura del header */
+        }
+
+        .content {
+            margin-left: 250px; /* Margen izquierdo para evitar el sidebar */
+            margin-top: 60px; /* Margen superior para evitar el header */
+            padding: 20px; /* Espaciado del contenido */
+            flex: 1; /* Ocupa el resto del espacio */
+        }
+        .nav-link {
+            margin: 10px 15px; /* Espaciado entre botones */
+        }
+        .header-button {
+            color: white; /* Color del texto de los botones */
+            text-decoration: none; /* Quitar subrayado */
+            margin-left: 15px; /* Espaciado entre botones */
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <h4 class="text-center">Menú</h4>
+        <ul class="nav flex-column">
+            <li class="nav-item">
+                <a class="nav-link" asp-controller="Home" asp-action="Index">Principal</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" asp-controller="Perfil" asp-action="Index">Perfil</a>
+            <li class="nav-item">
+                <a class="nav-link" asp-controller="Prestamo" asp-action="Index">Reservar</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" asp-controller="Prestamo" asp-action="HistorialPrestamos">Historial de Préstamos</a>
+            </li>
+            <li class="nav-item">
+                <form asp-controller="Auth" asp-action="Logout" method="post" style="display:inline;">
+                    <button type="submit" class="nav-link btn btn-link">Salir</button>
+                </form>
+            </li>
+        </ul>
+    </div>
+
+    <div class="header">
+        <h2 class="text-center">LAYOUT ESTUDIANTE</h2>
+        <div class="header-buttons">
+            <a class="header-button" href="#" title="Notificaciones">🔔</a>
+            <a class="header-button" href="#" title="Perfil">👤</a>
+        </div>
+    </div>
+
+    <div class="content">
+        <main role="main" class="pb-3">
+            @RenderBody() <!-- Aquí se renderiza el contenido de las vistas -->
+        </main>
+    </div>
+
+    <footer class="border-top footer text-muted">
+        <div class="container">
+            &copy; 2024 - SistemaPrestamoEquipos
+        </div>
+    </footer>
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

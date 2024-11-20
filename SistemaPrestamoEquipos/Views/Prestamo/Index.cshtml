@@ -1,0 +1,151 @@
+﻿@model List<EquipoModel>
+
+@{
+    ViewData["Title"] = "Equipos Disponibles";
+    var message = TempData["Message"] as string;
+    int idPrestamo = (int) TempData["IdPrestamo"];
+}
+
+<link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+
+
+
+<style>
+
+    .custom-alert {
+        position: fixed;
+        bottom: 20px; /* Espacio desde el fondo */
+        right: 20px; /* Espacio desde la derecha */
+        z-index: 1050; /* Asegura que esté por encima de otros elementos */
+        background-color: black; /* Fondo negro */
+        color: white; /* Texto blanco */
+        border: 1px solid white; /* Borde blanco opcional */
+        padding: 10px; /* Espaciado interno */
+        display: none; /* Oculta por defecto; se puede mostrar con JavaScript */
+        border-radius: 5px; /* Esquinas redondeadas opcionales */
+    }
+
+</style>
+
+<div class="container">
+    
+    @if (idPrestamo != -1)
+    {
+        <div class="alert alert-info" role="alert">
+            <strong>¡Atención!</strong> Usted tiene un préstamo pendiente.
+            <button class="btn btn-success" id="btnVerPrestamo" data-id="@idPrestamo">Ver Préstamo </button>
+        </div>
+    }
+
+    <h2>Equipos Disponibles</h2>
+    <table class="table" id="equiposTable">
+        <thead>
+            <tr>
+                <th>Nombre</th>
+                <th>Num Labo</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model != null && Model.Any())
+            {
+                foreach (var equipo in Model)
+                {
+                    <tr data-id="@equipo.IdEquipo">
+                        <td>@equipo.Nombre</td>
+                        <td>@equipo.NumLabo</td>
+                    </tr>
+                }
+            }
+            else
+            {
+                <tr>
+                    <td colspan="4" class="text-warning">No hay equipos disponibles.</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    @if (!string.IsNullOrEmpty(message))
+    {
+        <div class="alert custom-alert" role="alert" id="error-message">
+            @message
+        </div>
+    }
+
+</div>
+
+<!-- Modal para agregar préstamo de equipo -->
+<div class="modal" id="addPrestamoModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Agregar Préstamo de Equipo</h5>
+            </div>
+            <div class="modal-body">
+                <form id="addPrestamoForm" method="post" action="@Url.Action("AddPrestamo", "Prestamo")">
+                    <div class="form-group">
+                        <label for="idEquipo">ID del Equipo:</label>
+                        <input type="number" class="form-control" id="idEquipo" name="idEquipo" required />
+                    </div>
+                    <div class="form-group">
+                        <label for="horaInicioPedido">Hora de Inicio del Pedido:</label>
+                        <input type="time" class="form-control" id="horaInicioPedido" name="horaInicioPedido" required />
+                    </div>
+
+                    <div class="form-group">
+                        <label for="tiempoPedido">Tiempo del Pedido (en minutos):</label>
+                        <select class="form-control" id="tiempoPedido" name="tiempoPedido" required>
+                            <option value="30">30 minutos</option>
+                            <option value="60">60 minutos</option>
+                            <option value="90">90 minutos</option>
+                            <option value="120">120 minutos</option>
+                        </select>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-primary">Guardar</button>
+                        <button type="button" class="btn btn-secondary" id="btnCancelAddPrestamo">Cancelar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+                    var errorMessage = $("#error-message");
+                    if (errorMessage.length) {
+                        errorMessage.show(); // Mostrar el mensaje
+                        setTimeout(function () {
+                                    errorMessage.fadeOut(); // Desaparecer después de 3 segundos
+                        }, 3000);
+                    }
+        });
+
+        $(document).ready(function () {
+            $('#equiposTable tbody tr').on('click', function () {
+                if(@idPrestamo == -1)
+                {
+                    var idEquipo = $(this).data('id');  // Obtener el ID de la fila seleccionada
+                    $('#idEquipo').val(idEquipo);
+                    $('#addPrestamoModal').modal('show');
+                }
+            });
+
+            $('#btnVerPrestamo').click(function () {
+                var idPrestamo = $(this).data('id');
+                window.location.href = '@Url.Action("Prestamo", "Prestamo", new { idPrestamo = "__idPrestamo__" })'.replace('__idPrestamo__', idPrestamo);
+            });
+
+            $('#btnCancelAddPrestamo').click(function () {
+                $('#addPrestamoModal').modal('hide');
+            });
+
+        });
+
+    </script>
+}
