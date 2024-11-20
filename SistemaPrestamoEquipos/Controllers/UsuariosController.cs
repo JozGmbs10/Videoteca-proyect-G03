@@ -41,7 +41,7 @@ namespace SistemaPrestamoEquipos.Controllers
             TempData["Message"] = "Error al añadir el estudiante";
             return RedirectToAction("Index");
         }
-
+        /*
         [HttpPost]
         public IActionResult InhabilitarEstudiante(int idEstudiante)
         {
@@ -56,7 +56,30 @@ namespace SistemaPrestamoEquipos.Controllers
             }
             TempData["Message"] = "Error al modificar el equipo";
             return RedirectToAction("Index");
+        }*/
+        [HttpPost]
+        public IActionResult ToggleEstadoEstudiante(int idEstudiante)
+        {
+            int? userIdRol = HttpContext.Session.GetInt32("UserIdRol");
+            if (userIdRol.HasValue)
+            {
+                int idAdmin = userIdRol.Value;
+                var estudiante = _usuarioService.GetEstudiante(idEstudiante);
+
+                if (estudiante != null)
+                {
+                    string nuevoEstado = estudiante.Estado == "habilitado" ? "inhabilitado" : "habilitado";
+                    string mensajeDb = _usuarioService.SetEstadoEstudiante(idAdmin, idEstudiante, nuevoEstado);
+
+                    TempData["Message"] = mensajeDb;
+                    return Json(new { success = true, nuevoEstado });
+                }
+            }
+
+            TempData["Message"] = "Error al cambiar el estado del estudiante.";
+            return Json(new { success = false });
         }
+
 
     }
 }

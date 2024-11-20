@@ -28,7 +28,15 @@ else
         </div>
 
         <div>
-            <button type="button" class="btn btn-primary" id="btnInhabilitarEstudiante">Inhabilitar</button>
+            <!--
+                <button type="button" class="btn btn-primary" id="btnInhabilitarEstudiante">Inhabilitar</button>
+            -->
+
+            <button type="button" class="btn btn-primary" id="btnToggleEstado" data-id="@Model.IdEstudiante" data-estado="@Model.Estado">
+                @(Model.Estado == "habilitado" ? "Inhabilitar" : "Habilitar")
+            </button>
+
+
             <button type="button" class="btn btn-primary" id="btnReestablecerContrasenia">Reestablecer Contraseña</button>
             <button type="button" class="btn btn-primary" id="btnDeleteEstudiante">Eliminar Estudiante</button>
         </div>
@@ -61,7 +69,28 @@ else
                 }
                 isEditing = !isEditing;
                 */
-             });
+            });
+        });
+    </script>
+
+    <script>
+        $(document).ready(function () {
+            $('#btnToggleEstado').click(function () {
+                const idEstudiante = $(this).data('id');
+                const estadoActual = $(this).data('estado');
+                const url = '@Url.Action("ToggleEstadoEstudiante", "Usuarios")';
+
+                $.post(url, { idEstudiante: idEstudiante }, function (response) {
+                    if (response.success) {
+                        const nuevoEstado = response.nuevoEstado;
+                        $('#btnToggleEstado').text(nuevoEstado === "habilitado" ? "Inhabilitar" : "Habilitar");
+                        $('#btnToggleEstado').data('estado', nuevoEstado);
+                        alert("El estado del estudiante ha cambiado a: " + nuevoEstado);
+                    } else {
+                        alert("Hubo un error al cambiar el estado del estudiante.");
+                    }
+                });
+            });
         });
     </script>
 }

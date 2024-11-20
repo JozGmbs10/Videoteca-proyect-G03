@@ -111,7 +111,7 @@ namespace SistemaPrestamoEquipos.Models
                     };
                     cmd.Parameters.Add(rolParameter);
 
-                    SqlParameter idUsuarioParameter = new SqlParameter("@id_usuario", SqlDbType.Int){Direction = ParameterDirection.Output};
+                    SqlParameter idUsuarioParameter = new SqlParameter("@id_usuario", SqlDbType.Int) { Direction = ParameterDirection.Output };
                     cmd.Parameters.Add(idUsuarioParameter);
 
                     try
@@ -120,9 +120,9 @@ namespace SistemaPrestamoEquipos.Models
                         cmd.ExecuteNonQuery();
 
                         // Capturar las salidas
-                        id = (int) idParameter.Value;
-                        rol = (string) rolParameter.Value;
-                        idUsuario = (int) idUsuarioParameter.Value;
+                        id = (int)idParameter.Value;
+                        rol = (string)rolParameter.Value;
+                        idUsuario = (int)idUsuarioParameter.Value;
                     }
                     catch (SqlException ex)
                     {
@@ -197,7 +197,7 @@ namespace SistemaPrestamoEquipos.Models
             }
             return mensajeDb;
         }
-
+        /*
         public string InhabilitarEstudiante(int idAdmin, int idEstudiante)
         {
             var cn = new Conexion();
@@ -221,7 +221,35 @@ namespace SistemaPrestamoEquipos.Models
                 }
             }
             return mensajeDb;
+        }*/
+
+        public string SetEstadoEstudiante(int idAdmin, int idEstudiante, string nuevoEstado)
+        {
+            string mensajeDb = "Error al conectar con la base de datos.";
+            var cn = new Conexion();
+
+            using (var conexion = new SqlConnection(cn.getCadenaSQL()))
+            {
+                conexion.Open();
+                using (var cmd = new SqlCommand("sp_set_estado_estudiante", conexion))
+                {
+                    cmd.CommandType = CommandType.StoredProcedure;
+
+                    cmd.Parameters.Add("@id_admin", SqlDbType.Int).Value = idAdmin;
+                    cmd.Parameters.Add("@id_estudiante", SqlDbType.Int).Value = idEstudiante;
+                    cmd.Parameters.Add("@nuevo_estado", SqlDbType.NVarChar, 20).Value = nuevoEstado;
+
+                    var mensajeParam = new SqlParameter("@mensaje", SqlDbType.NVarChar, 255) { Direction = ParameterDirection.Output };
+                    cmd.Parameters.Add(mensajeParam);
+                    cmd.ExecuteNonQuery();
+
+                    mensajeDb = (string)mensajeParam.Value;
+                }
+            }
+
+            return mensajeDb;
         }
+
 
         public EstudianteModel GetEstudiante(int idEstudiante)
         {
