@@ -6,79 +6,125 @@
     <title>@ViewData["Title"] - SistemaPrestamoEquipos</title>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
     <style>
         body {
             display: flex;
+            flex-direction: column;
             height: 100vh;
             margin: 0;
-        }
-        .sidebar {
-            width: 250px; /* Ancho del sidebar */
-            background-color: #f8f9fa; /* Color de fondo del sidebar */
-            padding: 20px 0; /* Espaciado vertical */
-            position: fixed; /* Fijar el sidebar */
-            height: 100%; /* Altura completa */
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
 
+        .sidebar {
+            width: 250px;
+            background-color: #f0f4f8; /* Color de fondo claro */
+            padding: 20px 0;
+            position: fixed;
+            height: 100%;
+            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+        }
+
+            .sidebar h4 {
+                font-weight: bold;
+                color: #0056b3; /* Azul para diferenciar */
+            }
+
+            .sidebar .nav-link {
+                color: #0056b3;
+                font-weight: 500;
+                padding: 10px 15px;
+            }
+
+                .sidebar .nav-link:hover {
+                    background-color: #e7f1ff;
+                    border-radius: 5px;
+                }
+
+            .sidebar .nav-item i {
+                margin-right: 10px;
+            }
+
         .header {
-            width: calc(100% - 250px); /* Ancho completo menos el sidebar */
-            position: fixed; /* Fijar la franja superior */
+            width: calc(100% - 250px);
+            position: fixed;
             top: 0;
-            left: 250px; /* Alineación con el sidebar */
-            background-color: #343a40; /* Color de fondo de la cabecera */
-            color: white; /* Color del texto */
-            padding: 10px; /* Espaciado */
-            z-index: 1000; /* Asegurar que esté sobre el contenido */
-            display: flex; /* Usar flexbox para alinear botones */
-            justify-content: space-between; /* Separar elementos a los extremos */
-            align-items: center; /* Centrar verticalmente */
-            height: 50px; /* Define la altura del header */
+            left: 250px;
+            background-color: #0056b3; /* Azul para el header */
+            color: white;
+            padding: 10px 20px;
+            z-index: 1000;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 60px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+            .header h2 {
+                font-size: 20px;
+                margin: 0;
+            }
+
+        .header-buttons a {
+            color: white;
+            font-size: 18px;
+            margin-left: 15px;
         }
 
         .content {
-            margin-left: 250px; /* Margen izquierdo para evitar el sidebar */
-            margin-top: 60px; /* Margen superior para evitar el header */
-            padding: 20px; /* Espaciado del contenido */
-            flex: 1; /* Ocupa el resto del espacio */
+            margin-left: 250px;
+            margin-top: 60px;
+            padding: 20px;
+            flex: 1;
         }
-        .nav-link {
-            margin: 10px 15px; /* Espaciado entre botones */
-        }
-        .header-button {
-            color: white; /* Color del texto de los botones */
-            text-decoration: none; /* Quitar subrayado */
-            margin-left: 15px; /* Espaciado entre botones */
+
+        footer {
+            background-color: #f0f4f8;
+            text-align: center;
+            padding: 10px 0;
         }
     </style>
 </head>
 <body>
     <div class="sidebar">
-        <h4 class="text-center">Menú</h4>
+        <h4 class="text-center">Menú Estudiante</h4>
         <ul class="nav flex-column">
             <li class="nav-item">
-                <a class="nav-link" asp-controller="Home" asp-action="Index">Principal</a>
+                <a class="nav-link" asp-controller="Home" asp-action="Index">
+                    <i class="fas fa-home"></i> Principal
+                </a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" asp-controller="Perfil" asp-action="Index">Perfil</a>
-            <li class="nav-item">
-                <a class="nav-link" asp-controller="Prestamo" asp-action="Index">Reservar</a>
+                <a class="nav-link" asp-controller="Perfil" asp-action="Index">
+                    <i class="fas fa-user"></i> Perfil
+                </a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" asp-controller="Prestamo" asp-action="HistorialPrestamos">Historial de Préstamos</a>
+                <a class="nav-link" asp-controller="Prestamo" asp-action="Index">
+                    <i class="fas fa-calendar-plus"></i> Reservar
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" asp-controller="Prestamo" asp-action="HistorialPrestamos">
+                    <i class="fas fa-clock"></i> Historial de Préstamos
+                </a>
             </li>
             <li class="nav-item">
                 <form asp-controller="Auth" asp-action="Logout" method="post" style="display:inline;">
-                    <button type="submit" class="nav-link btn btn-link">Salir</button>
+                    <button type="submit" class="nav-link btn btn-link">
+                        <i class="fas fa-sign-out-alt"></i> Salir
+                    </button>
                 </form>
             </li>
         </ul>
     </div>
 
     <div class="header">
-        <h2 class="text-center">LAYOUT ESTUDIANTE</h2>
+        <h2>Panel de Estudiante</h2>
         <div class="header-buttons">
-            <a class="header-button" href="#" title="Notificaciones">🔔</a>
-            <a class="header-button" href="#" title="Perfil">👤</a>
+            <a href="#" title="Notificaciones"><i class="fas fa-bell"></i></a>
+            <a href="#" title="Perfil"><i class="fas fa-user-circle"></i></a>
         </div>
     </div>
 

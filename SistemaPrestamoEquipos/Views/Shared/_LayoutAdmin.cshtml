@@ -6,108 +6,166 @@
     <title>@ViewData["Title"] - SistemaPrestamoEquipos</title>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
     <style>
         body {
-             display: flex;
-             height: 100vh;
-             margin: 0;
-         }
-         .sidebar {
-             width: 250px; /* Ancho del sidebar */
-             background-color: #f8f9fa; /* Color de fondo del sidebar */
-             padding: 20px 0; /* Espaciado vertical */
-             position: fixed; /* Fijar el sidebar */
-             height: 100%; /* Altura completa */
-         }
-
-         .header {
-             width: calc(100% - 250px); /* Ancho completo menos el sidebar */
-             position: fixed; /* Fijar la franja superior */
-             top: 0;
-             left: 250px; /* Alineación con el sidebar */
-             background-color: #343a40; /* Color de fondo de la cabecera */
-             color: white; /* Color del texto */
-             padding: 10px; /* Espaciado */
-             z-index: 1000; /* Asegurar que esté sobre el contenido */
-             display: flex; /* Usar flexbox para alinear botones */
-             justify-content: space-between; /* Separar elementos a los extremos */
-             align-items: center; /* Centrar verticalmente */
-             height: 50px; /* Define la altura del header */
-         }
-
-         .content {
-             margin-left: 250px; /* Margen izquierdo para evitar el sidebar */
-             margin-top: 60px; /* Margen superior para evitar el header */
-             padding: 20px; /* Espaciado del contenido */
-             flex: 1; /* Ocupa el resto del espacio */
-         }
-         .nav-link {
-             margin: 10px 15px; /* Espaciado entre botones */
-         }
-         .header-button {
-             color: white; /* Color del texto de los botones */
-             text-decoration: none; /* Quitar subrayado */
-             margin-left: 15px; /* Espaciado entre botones */
-         }
-
-        .alert {
-            position: fixed;
-            bottom: 10px; /* Alineado al fondo */
-            right: 10px; /* Alineado a la derecha */
-            z-index: 1050; /* Asegura que esté por encima de otros elementos */
-            width: 300px; /* Ajusta el ancho según tu preferencia */
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            margin: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
 
+        .sidebar {
+            width: 250px;
+            background-color: #f0f4f8; /* Azul oscuro */
+            padding: 20px 0;
+            position: fixed;
+            height: 100%;
+            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+        }
+
+            .sidebar h4 {
+                font-weight: bold;
+                text-align: center;
+                margin-bottom: 1.5rem;
+                color: #0056b3;
+            }
+
+            .sidebar .nav-link {
+                color: #0056b3;
+                padding: 10px 20px;
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                font-size: 1rem;
+                transition: all 0.3s ease;
+            }
+
+                .sidebar .nav-link:hover {
+                    background-color: #457b9d;
+                    color: white;
+                    border-radius: 5px;
+                }
+
+                .sidebar .nav-link .icon {
+                    font-size: 1.2rem;
+                }
+
+            .sidebar .nav-item i {
+                margin-right: 10px;
+            }
+
+        .header {
+            width: calc(100% - 250px);
+            background-color: #457b9d; /* Azul más claro */
+            color: white;
+            padding: 10px 20px;
+            position: fixed;
+            top: 0;
+            left: 250px;
+            z-index: 1000;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 60px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+            .header h2 {
+                margin: 0;
+                font-size: 1.5rem;
+            }
+
+        .header-buttons a {
+            color: white;
+            margin-left: 20px;
+            font-size: 1.2rem;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+            .header-buttons a:hover {
+                color: #f1faee;
+            }
+
+        .content {
+            margin-left: 250px;
+            margin-top: 60px;
+            padding: 20px;
+            flex: 1;
+            background-color: #f8f9fa;
+        }
+
+        footer {
+            background-color: #1d3557;
+            color: white;
+            text-align: center;
+            padding: 10px 0;
+            margin-top: auto;
+        }
     </style>
 </head>
 <body>
     <div class="sidebar">
-        <h4 class="text-center">Menú</h4>
+        <h4>Menú Admin</h4>
         <ul class="nav flex-column">
             <li class="nav-item">
-                <a class="nav-link" asp-controller="Home">Principal</a>
+                <a class="nav-link" asp-controller="Home">
+                    <i class="fas fa-home"></i> Principal
+                </a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" asp-controller="Perfil">Perfil</a>
+                <a class="nav-link" asp-controller="Perfil">
+                    <i class="fas fa-user"></i> Perfil
+                </a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="#">Reportes</a>
+                <a class="nav-link" href="#">
+                    <i class="fas fa-chart-bar"></i> Reportes
+                </a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" asp-controller="Usuarios" asp-action="Index">Gestion de Usuarios</a>
+                <a class="nav-link" asp-controller="Usuarios" asp-action="Index">
+                    <i class="fas fa-users-cog"></i> Gestión de Usuarios
+                </a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" asp-controller="Inventario" asp-action="Index">Inventario</a>
+                <a class="nav-link" asp-controller="Inventario" asp-action="Index">
+                    <i class="fas fa-boxes"></i> Inventario
+                </a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="#">Historial</a>
+                <a class="nav-link" href="#">
+                    <i class="fas fa-clock"></i> Historial
+                </a>
             </li>
             <li class="nav-item">
                 <form asp-controller="Auth" asp-action="Logout" method="post" style="display:inline;">
-                    <button type="submit" class="nav-link btn btn-link">Salir</button>
+                    <button type="submit" class="nav-link btn btn-link text-start">
+                        <i class="fas fa-sign-out-alt"></i> Salir
+                    </button>
                 </form>
             </li>
         </ul>
     </div>
 
     <div class="header">
-        <h2 class="text-center">LAYOUT ADMINISTRADOR</h2>
+        <h2>Panel de Administrador</h2>
         <div class="header-buttons">
-            <a class="header-button" href="#" title="Notificaciones">🔔</a>
-            <a class="header-button" href="#" title="Perfil">👤</a>
+            <a href="#" title="Notificaciones"><i class="fas fa-bell"></a>
+            <a href="#" title="Perfil"><i class="fas fa-user-circle"></i></a>
         </div>
     </div>
 
     <div class="content">
         <main role="main" class="pb-3">
-            @RenderBody() <!-- Aquí se renderiza el contenido de las vistas -->
+            @RenderBody()
         </main>
     </div>
 
-    <footer class="border-top footer text-muted">
-        <div class="container">
-            &copy; 2024 - SistemaPrestamoEquipos
-        </div>
+    <footer>
+        &copy; 2024 - SistemaPrestamoEquipos
     </footer>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
