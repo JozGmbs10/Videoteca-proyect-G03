@@ -2,90 +2,117 @@
 
 @{
     ViewData["Title"] = "Equipos Disponibles";
+
     var message = TempData["Message"] as string;
-    int idPrestamo = (int) TempData["IdPrestamo"];
+
+    int idPrestamo = (int)(TempData["IdPrestamo"] ?? -1);
+
+    var estudiante = ViewData["Estudiante"] as EstudianteModel;
 }
 
 <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
 
-
-
 <style>
-
     .custom-alert {
         position: fixed;
-        bottom: 20px; /* Espacio desde el fondo */
-        right: 20px; /* Espacio desde la derecha */
-        z-index: 1050; /* Asegura que esté por encima de otros elementos */
-        background-color: black; /* Fondo negro */
-        color: white; /* Texto blanco */
-        border: 1px solid white; /* Borde blanco opcional */
-        padding: 10px; /* Espaciado interno */
-        display: none; /* Oculta por defecto; se puede mostrar con JavaScript */
-        border-radius: 5px; /* Esquinas redondeadas opcionales */
+        bottom: 20px;
+        right: 20px;
+        z-index: 1050;
+        background-color: black;
+        color: white;
+        border: 1px solid white;
+        padding: 10px;
+        display: none;
+        border-radius: 5px;
     }
-
 </style>
 
 <div class="container">
-    
+    @if (!string.IsNullOrEmpty(message))
+
+    {
+        <div class="alert @(message.Contains("Error") || message.Contains("inhabilitada") ? "alert-danger" : "alert-info")" role="alert">
+            @message
+        </div>
+    }
+
+    @* Mensaje de cuenta inhabilitada *@
+    @if (estudiante != null && estudiante.Estado == "inhabilitado")
+
+    {
+        <div class="alert alert-danger" role="alert">
+            <strong>Cuenta Inhabilitada</strong>
+            <p>Su cuenta de estudiante está actualmente inhabilitada. No puede realizar préstamos de equipos.</p>
+            <p>Contacte al administrador para más información.</p>
+        </div>
+    }
+
+    @* Préstamo vigente *@
     @if (idPrestamo != -1)
+
     {
         <div class="alert alert-info" role="alert">
             <strong>¡Atención!</strong> Usted tiene un préstamo pendiente.
-            <button class="btn btn-success" id="btnVerPrestamo" data-id="@idPrestamo">Ver Préstamo </button>
+            <button class="btn btn-success" id="btnVerPrestamo" data-id="@idPrestamo">Ver Préstamo</button>
         </div>
     }
 
     <h2>Equipos Disponibles</h2>
+
+    @* Tabla de equipos *@
     <table class="table" id="equiposTable">
         <thead>
             <tr>
                 <th>Nombre</th>
                 <th>Num Labo</th>
+                <th>Acciones</th>
             </tr>
         </thead>
         <tbody>
             @if (Model != null && Model.Any())
             {
+
                 foreach (var equipo in Model)
+
                 {
                     <tr data-id="@equipo.IdEquipo">
                         <td>@equipo.Nombre</td>
                         <td>@equipo.NumLabo</td>
+                        <td>
+                            @* Solo mostrar botón de préstamo si está habilitado y no tiene préstamo vigente *@
+                            @if (estudiante != null && estudiante.Estado == "habilitado" && idPrestamo == -1)
+                            {
+                                <button class="btn btn-primary btn-sm btn-prestar" data-id="@equipo.IdEquipo">Prestar</button>
+                            }
+                        </td>
                     </tr>
                 }
             }
             else
             {
                 <tr>
-                    <td colspan="4" class="text-warning">No hay equipos disponibles.</td>
+                    <td colspan="3" class="text-warning">No hay equipos disponibles.</td>
                 </tr>
             }
         </tbody>
     </table>
-
-    @if (!string.IsNullOrEmpty(message))
-    {
-        <div class="alert custom-alert" role="alert" id="error-message">
-            @message
-        </div>
-    }
-
 </div>
 
-<!-- Modal para agregar préstamo de equipo -->
+@* Modal para agregar préstamo *@
 <div class="modal" id="addPrestamoModal" tabindex="-1" role="dialog">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">Agregar Préstamo de Equipo</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
             </div>
             <div class="modal-body">
                 <form id="addPrestamoForm" method="post" action="@Url.Action("AddPrestamo", "Prestamo")">
                     <div class="form-group">
                         <label for="idEquipo">ID del Equipo:</label>
-                        <input type="number" class="form-control" id="idEquipo" name="idEquipo" required />
+                        <input type="number" class="form-control" id="idEquipo" name="idEquipo" readonly required />
                     </div>
                     <div class="form-group">
                         <label for="horaInicioPedido">Hora de Inicio del Pedido:</label>
@@ -104,7 +131,7 @@
 
                     <div class="modal-footer">
                         <button type="submit" class="btn btn-primary">Guardar</button>
-                        <button type="button" class="btn btn-secondary" id="btnCancelAddPrestamo">Cancelar</button>
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
                     </div>
                 </form>
             </div>
@@ -112,40 +139,30 @@
     </div>
 </div>
 
-
-
 @section Scripts {
     <script>
         $(document).ready(function () {
-                    var errorMessage = $("#error-message");
-                    if (errorMessage.length) {
-                        errorMessage.show(); // Mostrar el mensaje
-                        setTimeout(function () {
-                                    errorMessage.fadeOut(); // Desaparecer después de 3 segundos
-                        }, 3000);
-                    }
-        });
+            // Mostrar mensaje temporal
+            var errorMessage = $("#error-message");
+            if (errorMessage.length) {
+                errorMessage.show();
+                setTimeout(function () {
+                    errorMessage.fadeOut();
+                }, 3000);
+            }
 
-        $(document).ready(function () {
-            $('#equiposTable tbody tr').on('click', function () {
-                if(@idPrestamo == -1)
-                {
-                    var idEquipo = $(this).data('id');  // Obtener el ID de la fila seleccionada
-                    $('#idEquipo').val(idEquipo);
-                    $('#addPrestamoModal').modal('show');
-                }
-            });
-
+            // Ver préstamo vigente
             $('#btnVerPrestamo').click(function () {
                 var idPrestamo = $(this).data('id');
                 window.location.href = '@Url.Action("Prestamo", "Prestamo", new { idPrestamo = "__idPrestamo__" })'.replace('__idPrestamo__', idPrestamo);
             });
 
-            $('#btnCancelAddPrestamo').click(function () {
-                $('#addPrestamoModal').modal('hide');
+            // Botón de préstamo
+            $('.btn-prestar').click(function () {
+                var idEquipo = $(this).data('id');
+                $('#idEquipo').val(idEquipo);
+                $('#addPrestamoModal').modal('show');
             });
-
         });
-
     </script>
 }

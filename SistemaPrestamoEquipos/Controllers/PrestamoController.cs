@@ -8,35 +8,72 @@ namespace SistemaPrestamoEquipos.Controllers
     {
         private readonly PrestamoService _prestamoService;
         private readonly InventarioService _inventarioService;
+        private readonly UsuarioService _usuarioService;
 
         public PrestamoController()
         {
             _prestamoService = new PrestamoService();
             _inventarioService = new InventarioService();
+            _usuarioService = new UsuarioService();
         }
 
         public IActionResult Index()
         {
-            var equiposDisponibles = this._inventarioService.ListEquiposDisponibles();
-
+            // Obtener el ID del estudiante de la sesión
             int? userIdRol = HttpContext.Session.GetInt32("UserIdRol");
-            if (userIdRol.HasValue)
+
+            if (!userIdRol.HasValue)
             {
-                int idEstudiante = userIdRol.Value;
-                int idPrestamoVigente = this._prestamoService.GetIdPrestamoVigente(idEstudiante);
-                TempData["IdPrestamo"] = idPrestamoVigente;
-                return View(equiposDisponibles);
+                // Redirigir a login si no hay sesión
+                TempData["Message"] = "Debe iniciar sesión para realizar un préstamo.";
+                return RedirectToAction("Login", "Cuenta");
             }
-            TempData["IdPrestamo"] = -1;
+
+            // Obtener información del estudiante
+            var estudiante = _usuarioService.GetEstudiante(userIdRol.Value);
+
+            // Verificar estado del estudiante
+            if (estudiante == null || estudiante.Estado == "inhabilitado")
+            {
+                TempData["Message"] = "Su cuenta está inhabilitada. No puede realizar préstamos.";
+                return View(new List<EquipoModel>());
+            }
+
+            // Obtener equipos disponibles
+            var equiposDisponibles = _inventarioService.ListEquiposDisponibles();
+
+            // Verificar préstamo vigente
+            int idPrestamoVigente = _prestamoService.GetIdPrestamoVigente(userIdRol.Value);
+            TempData["IdPrestamo"] = idPrestamoVigente;
+
             return View(equiposDisponibles);
         }
 
         public IActionResult Prestamo(int idPrestamo)
         {
-            string userRol = HttpContext.Session.GetString("TypeRol");
+            // Validar sesión
+            int? userIdRol = HttpContext.Session.GetInt32("UserIdRol");
+            if (!userIdRol.HasValue)
+            {
+                TempData["Message"] = "Debe iniciar sesión para ver un préstamo.";
+                return RedirectToAction("Login", "Cuenta");
+            }
 
+            // Obtener rol de la sesión
+            string userRol = HttpContext.Session.GetString("TypeRol");
             ViewData["UserRol"] = userRol;
-            var prestamo = this._prestamoService.GetPrestamo(idPrestamo);
+
+            // Obtener detalles del préstamo
+            var prestamo = _prestamoService.GetPrestamo(idPrestamo);
+
+            // Validar acceso al préstamo
+            if (prestamo == null ||
+                (userRol != "admin" && prestamo.IdEstudiante != userIdRol))
+            {
+                TempData["Message"] = "No tiene permiso para ver este préstamo.";
+                return RedirectToAction("Index");
+            }
+
             ViewData["ReturnUrl"] = Request.Headers["Referer"].ToString();
             return View(prestamo);
         }
@@ -44,47 +81,99 @@ namespace SistemaPrestamoEquipos.Controllers
         [HttpGet]
         public JsonResult ListPrestamosEstudiante(int idEstudiante)
         {
+            // Validar permiso de acceso
+            int? userIdRol = HttpContext.Session.GetInt32("UserIdRol");
+            string userRol = HttpContext.Session.GetString("TypeRol");
+
+            if (!userIdRol.HasValue ||
+                (userRol != "admin" && idEstudiante != userIdRol))
+            {
+                return Json(new { error = "No tiene permiso para ver estos préstamos." });
+            }
+
             var prestamos = _prestamoService.ListPrestamoEstudiante(idEstudiante);
             return Json(prestamos);
         }
 
         public IActionResult HistorialPrestamos()
         {
-            int idEstudiante = -1;
+            // Validar sesión
             int? userIdRol = HttpContext.Session.GetInt32("UserIdRol");
-            if (userIdRol.HasValue)
+            if (!userIdRol.HasValue)
             {
-                idEstudiante = userIdRol.Value;
-                var listaPrestamos = this._prestamoService.ListPrestamoEstudiante(idEstudiante);
-                ViewData["IdEstudiante"] = idEstudiante;
-                return View();
+                TempData["Message"] = "Debe iniciar sesión para ver el historial de préstamos.";
+                return RedirectToAction("Login", "Cuenta");
             }
-            return View();
-        }
 
+            // Obtener préstamos del estudiante
+            var listaPrestamos = _prestamoService.ListPrestamoEstudiante(userIdRol.Value);
+            ViewData["IdEstudiante"] = userIdRol.Value;
+
+            return View(listaPrestamos);
+        }
 
         [HttpPost]
         public IActionResult AddPrestamo(int idEquipo, TimeSpan horaInicioPedido, int tiempoPedido)
         {
+            // Validar sesión
             int? userIdRol = HttpContext.Session.GetInt32("UserIdRol");
-            if (userIdRol.HasValue)
+            if (!userIdRol.HasValue)
             {
-                int idEstudiante = userIdRol.Value;
-                string mensajeDb = _prestamoService.AddPrestamo(idEstudiante, idEquipo, horaInicioPedido, tiempoPedido);
-                TempData["Message"] = mensajeDb;
+                TempData["Message"] = "Debe iniciar sesión para realizar un préstamo.";
                 return RedirectToAction("Index");
             }
-            TempData["Message"] = "Error al añadir el prestamo";
+
+            // Validar estado del estudiante
+            var estudiante = _usuarioService.GetEstudiante(userIdRol.Value);
+            if (estudiante == null || estudiante.Estado == "inhabilitado")
+            {
+                TempData["Message"] = "Su cuenta está inhabilitada. No puede realizar préstamos.";
+                return RedirectToAction("Index");
+            }
+
+            // Validar si ya tiene un préstamo vigente
+            int prestamoVigente = _prestamoService.GetIdPrestamoVigente(userIdRol.Value);
+            if (prestamoVigente > 0)
+            {
+                TempData["Message"] = "Ya tiene un préstamo en curso. No puede realizar otro.";
+                return RedirectToAction("Index");
+            }
+
+            // Realizar el préstamo
+            int idEstudiante = userIdRol.Value;
+            string mensajeDb = _prestamoService.AddPrestamo(idEstudiante, idEquipo, horaInicioPedido, tiempoPedido);
+
+            TempData["Message"] = mensajeDb;
             return RedirectToAction("Index");
         }
 
         [HttpPost]
         public IActionResult SetPrestamoFinalizar(int idPrestamo)
         {
+            // Validar sesión
+            int? userIdRol = HttpContext.Session.GetInt32("UserIdRol");
+            string userRol = HttpContext.Session.GetString("TypeRol");
+
+            if (!userIdRol.HasValue)
+            {
+                TempData["Message"] = "Debe iniciar sesión para finalizar un préstamo.";
+                return RedirectToAction("Index");
+            }
+
+            // Validar permiso de finalización
+            var prestamo = _prestamoService.GetPrestamo(idPrestamo);
+            if (prestamo == null ||
+                (userRol != "admin" && prestamo.IdEstudiante != userIdRol))
+            {
+                TempData["Message"] = "No tiene permiso para finalizar este préstamo.";
+                return RedirectToAction("Index");
+            }
+
+            // Finalizar préstamo
             string mensajeDb = _prestamoService.SetPrestamoFinalizar(idPrestamo);
             TempData["Message"] = mensajeDb;
+
             return RedirectToAction("Index");
         }
-
     }
 }
