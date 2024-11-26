@@ -31,6 +31,7 @@ namespace SistemaPrestamoEquipos.Controllers
 
             // Obtener información del estudiante
             var estudiante = _usuarioService.GetEstudiante(userIdRol.Value);
+            ViewData["Estudiante"] = estudiante;
 
             // Verificar estado del estudiante
             if (estudiante == null || estudiante.Estado == "inhabilitado")
@@ -136,6 +137,25 @@ namespace SistemaPrestamoEquipos.Controllers
             if (prestamoVigente > 0)
             {
                 TempData["Message"] = "Ya tiene un préstamo en curso. No puede realizar otro.";
+                return RedirectToAction("Index");
+            }
+
+            // Validar que la hora de inicio sea posterior a la actual
+            var horaActual = DateTime.Now.TimeOfDay;
+            if (horaInicioPedido <= horaActual)
+            {
+                TempData["Message"] = "La hora de inicio debe ser posterior a la hora actual.";
+                return RedirectToAction("Index");
+            }
+
+            // Validar que la hora de inicio + tiempo de préstamo no exceda las horas de operación
+            // Asumiendo que el laboratorio opera hasta las 22:00 (puedes ajustar esto)
+            var horaFinPrestamo = horaInicioPedido.Add(TimeSpan.FromMinutes(tiempoPedido));
+            var horaMaxima = new TimeSpan(22, 0, 0); // 22:00 horas
+
+            if (horaFinPrestamo > horaMaxima)
+            {
+                TempData["Message"] = "El préstamo excede el horario de operación del laboratorio (hasta las 22:00).";
                 return RedirectToAction("Index");
             }
 

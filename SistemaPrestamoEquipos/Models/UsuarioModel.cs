@@ -7,6 +7,4 @@
         public string Correo { get; set; }
         public string Rol { get; set; } // Agregar rol si es necesario
     }
-
-
 }

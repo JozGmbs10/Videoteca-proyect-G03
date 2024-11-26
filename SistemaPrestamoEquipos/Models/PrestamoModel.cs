@@ -4,7 +4,7 @@
     {
         public int IdPrestamo { get; set; } // id_prestamo (clave primaria)
 
-        public int NombreEquipo { get; set; }
+        public string NombreEquipo { get; set; }
 
         public int IdEstudiante { get; set; } // id_estudiante (relacionado con tabla_estudiante)
 

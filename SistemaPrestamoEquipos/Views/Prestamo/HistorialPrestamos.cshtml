@@ -24,7 +24,7 @@
     }
 
 </style>
-
+@model List<PrestamoModel>
 <div class="container">
     <h2>Préstamos realizados</h2>
     <table class="table" id="prestamosTable">
@@ -34,7 +34,8 @@
                 <th>Estado</th>
                 <th>Fecha</th>
                 <th>Hora Inicio</th>
-                <th>Tiempo Usado</th>
+                <th>Hora Fin</th>
+                <th>Duración</th>
             </tr>
         </thead>
         <tbody id="prestamosTableBody">
@@ -54,62 +55,64 @@
 @section Scripts {
     <script>
         $(document).ready(function () {
-            // Llamar a la función para cargar los préstamos cuando la página se cargue
-            cargarPrestamos();
-
             function cargarPrestamos() {
-                var idEstudiante = @idEstudiante;  // Obtener el idEstudiante directamente desde el modelo
-
-                // Hacer una solicitud AJAX al controlador
+                var idEstudiante = @ViewData["IdEstudiante"];
                 $.ajax({
-                            url: '@Url.Action("ListPrestamosEstudiante", "Prestamo")', // URL de la acción que devuelve los préstamos
+                    url: '@Url.Action("ListPrestamosEstudiante", "Prestamo")',
                     type: 'GET',
-                    data: { idEstudiante: idEstudiante },  // Pasar el idEstudiante como parámetro
+                    data: { idEstudiante: idEstudiante },
                     success: function (data) {
                         if (data && data.length > 0) {
-                            // Si hay préstamos, añadir las filas a la tabla
                             var tbody = $('#prestamosTableBody');
-                            tbody.empty(); // Limpiar cualquier fila anterior
+                            tbody.empty();
                             
-                            // Iterar a través de los datos y agregar las filas a la tabla
                             data.forEach(function (prestamo) {
                                 var row = $('<tr></tr>').attr('data-id', prestamo.idPrestamo);
                                 row.append('<td>' + prestamo.nombreEquipo + '</td>');
                                 row.append('<td>' + prestamo.estado + '</td>');
                                 row.append('<td>' + prestamo.fecha + '</td>');
                                 row.append('<td>' + prestamo.horaInicioPedido + '</td>');
-                                row.append('<td>' + prestamo.tiempoUsado + '</td>');
+                                row.append('<td>' + prestamo.horaFinPedido + '</td>');
+                                
+                                // Mostrar tiempo usado
+                                var tiempoUsado = prestamo.prestamoActivo ? 
+                                    'En curso: ' + prestamo.tiempoUsado + ' min' : 
+                                    prestamo.tiempoUsado + ' min';
+                                row.append('<td>' + tiempoUsado + '</td>');
+                                
                                 tbody.append(row);
                             });
                         } else {
-                            // Si no hay datos, mostrar mensaje
                             var tbody = $('#prestamosTableBody');
-                            tbody.empty();  // Limpiar cualquier fila anterior
-                            tbody.append('<tr><td colspan="5" class="text-warning">No hay préstamos disponibles.</td></tr>');
+                            tbody.empty();
+                            tbody.append('<tr><td colspan="6" class="text-warning">No hay préstamos disponibles.</td></tr>');
                         }
                     },
                     error: function () {
-                        // Manejar el error si la solicitud falla
                         alert('Error al cargar los préstamos.');
                     }
                 });
             }
-            
+
+            // Cargar préstamos inicialmente
+            cargarPrestamos();
+
+            // Actualizar cada minuto para préstamos activos
+            setInterval(cargarPrestamos, 60000);
+
             $('#prestamosTable').on('click', 'tbody tr', function () {
                 console.log('click en tabla');
                 var idPrestamo = $(this).data('id');
                 window.location.href = '@Url.Action("Prestamo", "Prestamo", new { idPrestamo = "__idPrestamo__" })'.replace('__idPrestamo__', idPrestamo);
             });
 
-                                var errorMessage = $("#error-message");
-                    if (errorMessage.length) {
-                        errorMessage.show(); // Mostrar el mensaje
-                        setTimeout(function () {
-                                    errorMessage.fadeOut(); // Desaparecer después de 3 segundos
-                        }, 3000);
-                    }
-
+            var errorMessage = $("#error-message");
+            if (errorMessage.length) {
+                errorMessage.show(); // Mostrar el mensaje
+                setTimeout(function () {
+                    errorMessage.fadeOut(); // Desaparecer después de 3 segundos
+                }, 3000);
+            }
         });
-
     </script>
 }

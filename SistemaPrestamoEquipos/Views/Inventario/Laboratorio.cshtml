@@ -6,30 +6,49 @@
     var message = TempData["Message"] as string;
 }
 
-<link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" />
 
 <style>
     .custom-alert {
         position: fixed;
-        bottom: 20px; /* Espacio desde el fondo */
-        right: 20px; /* Espacio desde la derecha */
-        z-index: 1050; /* Asegura que esté por encima de otros elementos */
-        background-color: black; /* Fondo negro */
-        color: white; /* Texto blanco */
-        border: 1px solid white; /* Borde blanco opcional */
-        padding: 10px; /* Espaciado interno */
-        display: none; /* Oculta por defecto; se puede mostrar con JavaScript */
-        border-radius: 5px; /* Esquinas redondeadas opcionales */
+        bottom: 20px;
+        right: 20px;
+        z-index: 1050;
+        background-color: #000;
+        color: #fff;
+        padding: 15px;
+        border-radius: 8px;
+        display: none;
+    }
+
+    .nav-tabs .nav-link.active {
+        background-color: #0d6efd;
+        color: white;
+        border-radius: 8px 8px 0 0;
+    }
+
+    .modal-header, .modal-footer {
+        background-color: #f8f9fa;
+    }
+
+    .table thead {
+        background-color: #0d6efd;
+        color: white;
     }
 </style>
 
 @if (Model == null)
 {
-    <p> No se encontró el inventario solicitado</p>
+    <div class="alert alert-danger mt-3" role="alert">
+        No se encontró el inventario solicitado.
+    </div>
 }
 else
 {
-    <h2>Detalles del Inventario</h2>
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2>Detalles del Inventario</h2>
+        <a href="@Url.Action("Index", "Inventario")" class="btn btn-secondary btn-md">Regresar</a>
+    </div>
 
     <div>
         <p><strong>ID Inventario:</strong> @Model.IdInventario</p>
@@ -94,8 +113,14 @@ else
         </div>
     </div>
 
+    @if (!string.IsNullOrEmpty(message))
+    {
+        <div class="alert custom-alert" role="alert" id="error-message">
+            @message
+        </div>
+    }
 
-        @* Modal para agregar equipo *@
+    @* Modal para agregar equipo *@
     <div class="modal" id="addEquipoModal" tabindex="-1" role="dialog">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
@@ -104,7 +129,7 @@ else
                 </div>
                 <div class="modal-body">
                     <form id="addEquipoForm" method="post" action="@Url.Action("AddEquipo", "Inventario")" onsubmit="return validateEquipo()">
-                        <input type="hidden" id="idInventarioAddEquipo" name="idInventario" value="@Model.IdInventario"/>
+                        <input type="hidden" id="idInventarioAddEquipo" name="idInventario" value="@Model.IdInventario" />
                         <div class="form-group">
                             <label>Código en Labo:</label>
                             <input type="text" class="form-control" id="codigoEnLaboAdd" name="codigoEnLabo" required />
@@ -136,20 +161,6 @@ else
     </div>
 
 }
-
-@if (!string.IsNullOrEmpty(message))
-{
-            <div class="alert custom-alert" role="alert" id="error-message">
-        @message
-            </div>
-}
-
-<div>
-    <a href="@Url.Action("Index", "Inventario")" class="btn btn-secondary">Regresar</a>
-</div>
-
-
-
 
 
 
@@ -199,15 +210,15 @@ else
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
     <script>
 
-           $(document).ready(function () {
-                    var errorMessage = $("#error-message");
-                    if (errorMessage.length) {
-                        errorMessage.show(); // Mostrar el mensaje
-                        setTimeout(function () {
-                            errorMessage.fadeOut(); // Desaparecer después de 3 segundos
-                        }, 3000);
-                    }
-            });
+        $(document).ready(function () {
+            var errorMessage = $("#error-message");
+            if (errorMessage.length) {
+                errorMessage.show(); // Mostrar el mensaje
+                setTimeout(function () {
+                    errorMessage.fadeOut(); // Desaparecer después de 3 segundos
+                }, 3000);
+            }
+        });
 
         function validateComponente() {
             //document.getElementById('idInventarioAddComp').value = idInventario;
@@ -224,21 +235,21 @@ else
         }
 
         $("#btnAddEquipo").click(function () {
-                $('#addEquipoModal').modal('show');
-            });
+            $('#addEquipoModal').modal('show');
+        });
 
         $("#btnAddComponente").click(function () {
-                $('#addComponenteModal').modal('show');
-            });
+            $('#addComponenteModal').modal('show');
+        });
 
         $("#btnCancelAddEquipo").click(function () {
-                $('#addEquipoModal').modal('hide');
-            });
+            $('#addEquipoModal').modal('hide');
+        });
 
         $("#btnCancelAddComponente").click(function () {
-                $('#addComponenteModal').modal('hide');
-            });
-                
+            $('#addComponenteModal').modal('hide');
+        });
+
         var idInventario = @idInventario;
         if (idInventario) {
             cargarEquipos(idInventario);
@@ -255,7 +266,7 @@ else
                 if (equipos && equipos.length > 0) {
                     // Llenar la tabla con los datos de los equipos
                     for (var i = 0; i < equipos.length; i++) {
-                        var enlaceVerEquipo = '@Url.Action("Equipo", "Inventario", new { idEquipo = "__ID__"})'
+                        var enlaceVerEquipo = '@Url.Action("Equipo", "Inventario", new { idEquipo = "__ID__" })'
                             .replace('__ID__', equipos[i].idEquipo);
 
                         $("#equiposTable tbody").append(
@@ -286,7 +297,7 @@ else
                 var currentUrl = window.location.href;
                 if (componentes && componentes.length > 0) {
                     for (var i = 0; i < componentes.length; i++) {
-                        var enlaceVerComponente = '@Url.Action("Componente", "Inventario", new { idComponente = "__ID__"})'
+                        var enlaceVerComponente = '@Url.Action("Componente", "Inventario", new { idComponente = "__ID__" })'
                             .replace('__ID__', componentes[i].idComp);
 
                         $("#compsTable tbody").append(

@@ -106,7 +106,6 @@ namespace SistemaPrestamoEquipos.DB
         public List<PrestamoModel> ListPrestamoEstudiante(int idEstudiante)
         {
             var lista = new List<PrestamoModel>();
-
             var cn = new Conexion();
 
             using (var conexion = new SqlConnection(cn.getCadenaSQL()))
@@ -125,16 +124,21 @@ namespace SistemaPrestamoEquipos.DB
                 {
                     while (dr.Read())
                     {
-                        lista.Add(new PrestamoModel()
+                        var prestamo = new PrestamoModel()
+
                         {
                             IdPrestamo = Convert.ToInt32(dr["id_prestamo"]),
                             IdEstudiante = Convert.ToInt32(dr["id_estudiante"]),
                             IdEquipo = Convert.ToInt32(dr["id_equipo"]),
+                            NombreEquipo = dr["equipo_nombre"].ToString(),
                             Estado = (string)dr["estado"],
                             Fecha = DateOnly.FromDateTime(Convert.ToDateTime(dr["fecha"])),
-                            HoraInicioPedido = (TimeSpan) dr["hora_inicio_pedido"],
+                            HoraInicioPedido = (TimeSpan)dr["hora_inicio_pedido"],
+                            HoraFinPedido = (TimeSpan)dr["hora_fin_pedido"],
+                            TiempoPedido = Convert.ToInt32(dr["tiempo_pedido"]),
                             TiempoUsado = Convert.ToInt32(dr["tiempo_usado"])
-                        });
+                        };
+                        lista.Add(prestamo);
                     }
                 }
             }
